@@ -40,7 +40,7 @@ jobs:
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_SMOKE_0AF63CE1E }}
           action: "upload"
           app_location: "published/wwwroot"  # pre-built output
           api_location: ""                  # leave empty if no API
