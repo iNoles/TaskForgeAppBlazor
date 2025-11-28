@@ -1,0 +1,58 @@
+name: Azure Static Web Apps CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+
+jobs:
+  build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v3
+
+      # Setup .NET 10.0 SDK
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '10.0.x'
+
+      # Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore TaskForgeAppBlazor/TaskForgeAppBlazor.csproj
+
+      # Build project
+      - name: Build project
+        run: dotnet build TaskForgeAppBlazor/TaskForgeAppBlazor.csproj -c Release --no-restore
+
+      # Publish Blazor WASM to wwwroot
+      - name: Publish Blazor WASM
+        run: dotnet publish TaskForgeAppBlazor/TaskForgeAppBlazor.csproj -c Release -o published
+
+      # Deploy to Azure Static Web Apps
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: "upload"
+          app_location: "published/wwwroot"  # pre-built output
+          api_location: ""                  # leave empty if no API
+          output_location: ""               # already included in app_location
+
+  close_pull_request_job:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Pull Request Job
+    steps:
+      - name: Close Pull Request
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: "close"
