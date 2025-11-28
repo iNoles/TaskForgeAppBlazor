@@ -1,0 +1,133 @@
+﻿@page "/"
+@inject TaskStore TaskStore
+@inject TaskState TaskState
+@inject IJSRuntime JS
+@implements IDisposable
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-primary" @onclick="OpenNew">+ New Task</button>
+            <button class="btn btn-secondary" @onclick="ExportJson">Export</button>
+            <input class="form-control" style="width:200px;" placeholder="Search..." @bind="_search" />
+        </div>
+        <small>@(TaskState.Tasks?.Count ?? 0) tasks</small>
+    </div>
+    
+    <TaskListView Tasks="@FilteredTasks" EditTask="EditTask" DeleteTask="DeleteTask" ToggleComplete="ToggleComplete" />
+</div>
+
+@if (_showModal)
+{
+<div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title">@(_isNewTask ? "New Task" : "Edit Task")</h5>
+<button type="button" class="btn-close" @onclick="CloseModal"></button>
+</div>
+<div class="modal-body d-flex flex-column gap-2">
+@if (_editing != null)
+{
+    <input class="form-control" placeholder="Title" @bind="_editing.Title" />
+    <textarea class="form-control" placeholder="Description" @bind="_editing.Description"></textarea>
+    <label>Due Date: <input class="form-control" type="date" @bind="_editing.DueDate" /></label>
+    <label>Priority:
+    <select class="form-select" @bind="_editing.Priority">
+    <option value="0">Low</option>
+    <option value="1">Medium</option>
+    <option value="2">High</option>
+    </select>
+    </label>
+}
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+<button class="btn btn-primary" @onclick="SaveTask">Save</button>
+</div>
+</div>
+</div>
+</div>
+}
+
+
+@code {
+    private bool _showModal = false;
+    private TaskItem _editing = new TaskItem();
+    private string _search = "";
+    private bool _isNewTask = true;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        TaskState.OnChange += StateHasChanged;
+        await TaskStore.LoadTasksAsync();
+        await JS.InvokeVoidAsync(identifier: "taskForge.registerDragAndDrop", "task-list", DotNetObjectReference.Create(this));
+    }
+    
+    public void Dispose() => TaskState.OnChange -= StateHasChanged;
+    
+   private List<TaskItem> FilteredTasks => 
+    (string.IsNullOrWhiteSpace(_search) ? TaskState.Tasks : TaskState.Tasks.Where(t => t.Title.Contains(_search, StringComparison.OrdinalIgnoreCase))).ToList();
+    
+    private void OpenNew()
+    {
+        _editing = new TaskItem();
+        _isNewTask = true;
+        _showModal = true;
+    }
+    
+    private void EditTask(TaskItem task) { 
+        _editing = new TaskItem { 
+            Id = task.Id,
+            Title = task.Title,
+            Description = task.Description,
+            IsCompleted = task.IsCompleted,
+            Priority = task.Priority,
+            DueDate = task.DueDate,
+            Position = task.Position,
+            CreatedAt = task.CreatedAt,
+            UpdatedAt = task.UpdatedAt
+        };
+        _isNewTask = false;
+        _showModal = true;
+    }
+    
+    private async Task SaveTask()
+    {
+        _editing.UpdatedAt = DateTime.UtcNow;
+        
+        bool exists = TaskState.Tasks.Any(t => t.Id == _editing.Id);
+        if (exists)
+        {
+            await TaskStore.UpdateTaskAsync(_editing);
+        }
+        else {
+            _editing.Position = TaskState.Tasks.Any() ? TaskState.Tasks.Max(t => t.Position) + 1 : 0;
+            await TaskStore.AddTaskAsync(_editing);
+        }
+        _showModal = false;
+    }
+    
+    private void CloseModal() => _showModal = false;
+    private async Task DeleteTask(TaskItem task) => await TaskStore.RemoveTaskAsync(task.Id);
+    private async Task ToggleComplete(TaskItem task) { task.IsCompleted = !task.IsCompleted; task.UpdatedAt = DateTime.UtcNow; await TaskStore.UpdateTaskAsync(task); }
+    
+    [JSInvokable]
+    public async Task OnReorder(string[] ids)
+    {
+        for (int i = 0; i < ids.Length; i++)
+        { 
+            TaskItem? t = TaskState.Tasks.FirstOrDefault(x => x.Id == ids[i]);
+            if (t != null) {
+                t.Position = i;
+                await TaskStore.UpdateTaskAsync(t);
+            }
+        }
+    }
+    
+    private async Task ExportJson() { 
+        string? json = System.Text.Json.JsonSerializer.Serialize(TaskState.Tasks);
+        await JS.InvokeVoidAsync(identifier: "navigator.clipboard.writeText", json);
+        await JS.InvokeVoidAsync(identifier: "taskForge.notify", "Exported tasks", new { body = "Tasks copied to clipboard" });
+    }
+}

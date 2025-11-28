@@ -1,0 +1,17 @@
+﻿<div id="@ListId" class="row g-3">
+@foreach (TaskItem task in Tasks)
+{
+    <div class="col-12 col-md-6 col-lg-4 draggable" data-id="@task.Id">
+        <TaskCard Task="@task" OnEdit="EditTask" OnDelete="DeleteTask" OnToggleComplete="ToggleComplete" />
+    </div>
+}
+</div>
+
+
+@code {
+    [Parameter] public List<TaskItem> Tasks { get; set; } = new List<TaskItem>();
+    [Parameter] public EventCallback<TaskItem> EditTask { get; set; }
+    [Parameter] public EventCallback<TaskItem> DeleteTask { get; set; }
+    [Parameter] public EventCallback<TaskItem> ToggleComplete { get; set; }
+    [Parameter] public string ListId { get; set; } = "task-list";
+}
