@@ -18,8 +18,11 @@
 ## Tech Stack
 
 **Frontend / Web:** Blazor WebAssembly, Razor Components, Bootstrap, JavaScript, IndexedDB
+
 **Backend / Core:** C#, .NET Core
+
 **Tools & Practices:** Git, CI/CD, MVVM, Dependency Injection 
+
 **Cloud Deployment:** Azure Static Web Apps  
 
 ---
