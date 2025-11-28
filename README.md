@@ -40,7 +40,8 @@ cd TaskForgeAppBlazor
 ```
 ### Build and Run Locally
 
-```bash dotnet restore
+```bash
+dotnet restore
 dotnet build
 dotnet run --project TaskForgeAppBlazor/TaskForgeAppBlazor.csproj
 ```
