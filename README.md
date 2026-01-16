@@ -1,6 +1,6 @@
 # TaskForge
 
-**TaskForge** is a personal task management web application built with **Blazor WebAssembly**. It provides a clean, responsive, and modular interface for managing tasks with priority, due dates, and drag-and-drop ordering. The app is designed to be lightweight, maintainable, and deployable on **Azure Static Web Apps**.
+**TaskForge** is a personal task management web application built with **Blazor WebAssembly**. It provides a clean, responsive, and modular interface for managing tasks with priority, due dates, and drag-and-drop ordering. 
 
 ---
 
@@ -22,8 +22,6 @@
 **Backend / Core:** C#, .NET Core
 
 **Tools & Practices:** Git, CI/CD, MVVM, Dependency Injection 
-
-**Cloud Deployment:** Azure Static Web Apps  
 
 ---
 
