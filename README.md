@@ -2,8 +2,6 @@
 
 TaskForge is a personal task management web application built with **Blazor WebAssembly**. It offers a clean, responsive, and modular experience for managing tasks with priorities, due dates, and intuitive drag-and-drop ordering. The application is designed with modern .NET practices, emphasizing maintainability, testability, and performance.
 
----
-
 ## Features
 
 - Task Management: Add, edit, and delete tasks with title, description, due date, and priority
@@ -14,8 +12,6 @@ TaskForge is a personal task management web application built with **Blazor WebA
 - Modular Architecture: MVVM pattern with Dependency Injection
 - Quality & Reliability: Unit and integration testing included
 
----
-
 ## Architecture Overview
 
 TaskForge follows a modular, client-side architecture optimized for scalability and maintainability:
@@ -25,7 +21,9 @@ TaskForge follows a modular, client-side architecture optimized for scalability 
 - Dependency Injection for loose coupling and testability
 - IndexedDB for local, offline-capable persistence
 
----
+## Screenshot
+
+![Main](taskforge.png)
 
 ## Tech Stack
 
@@ -34,8 +32,6 @@ TaskForge follows a modular, client-side architecture optimized for scalability 
 **Backend / Core:** C#, .NET Core
 
 **Tools & Practices:** Git, CI/CD, MVVM, Dependency Injection 
-
----
 
 ## Getting Started
 
